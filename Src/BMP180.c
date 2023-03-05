@@ -6,6 +6,17 @@ extern I2C_HandleTypeDef hi2c1;
 
 #define BMP180_ADDRESS 0xEE
 
+const float POW2_11  = pow(2,  11);
+const float POW2_M2  = pow(2,  -2);
+const float POW2_M4  = pow(2,  -4);
+const float POW2_M8  = pow(2,  -8);
+const float POW2_M11 = pow(2, -11);
+const float POW2_M12 = pow(2, -12);
+const float POW2_M13 = pow(2, -13);
+const float POW2_M15 = pow(2, -15);
+const float POW2_M16 = pow(2, -16);
+
+
 short AC1 = 0;
 short AC2 = 0;
 short AC3 = 0;
@@ -73,10 +84,10 @@ uint16_t Get_UTemp (void)
 float BMP180_GetTemp (void)
 {
 	UT = Get_UTemp();
-	X1 = ((UT - AC6) * (AC5 * (pow(2,-15))));
-	X2 = ((MC * (pow(2,11))) / (X1+MD));
+	X1 = ((UT - AC6) * (AC5 * (POW2_M15)));
+	X2 = ((MC * (POW2_11)) / (X1 + MD));
 	B5 = X1 + X2;
-	Temp = (B5 + 8) * (pow(2,-4));
+	Temp = (B5 + 8) * (POW2_M4);
 	return Temp / 10.0;
 }
 
@@ -109,27 +120,27 @@ uint32_t Get_UPress (int oss)   // oversampling setting 0,1,2,3
 float BMP180_GetPress (int oss)
 {
 	UP = Get_UPress(oss);
-	X1 = ((UT - AC6) * (AC5 * (pow(2,-15))));
-	X2 = ((MC * (pow(2,11))) / (X1+MD));
+	X1 = ((UT - AC6) * (AC5 * (POW2_M15)));
+	X2 = ((MC * (POW2_11)) / (X1+MD));
 	B5 = X1 + X2;
 	B6 = B5 - 4000;
-	X1 = (B2 * (B6 * B6 * (pow(2,-12)))) * (pow(2,-11));
-	X2 = AC2 * B6 * (pow(2,-11));
+	X1 = (B2 * (B6 * B6 * (POW2_M12))) * (POW2_M11);
+	X2 = AC2 * B6 * (POW2_M11);
 	X3 = X1 + X2;
 	B3 = (((AC1 * 4 + X3) << oss) + 2) / 4;
-	X1 = AC3 * B6 * pow(2,-13);
-	X2 = (B1 * (B6 * B6 * (pow(2,-12)))) * (pow(2,-16));
-	X3 = ((X1 + X2) + 2) * pow(2,-2);
-	B4 = AC4 * (unsigned long)(X3 + 32768) * (pow(2,-15));
+	X1 = AC3 * B6 * POW2_M13;
+	X2 = (B1 * (B6 * B6 * (POW2_M12))) * (POW2_M16);
+	X3 = ((X1 + X2) + 2) * POW2_M2;
+	B4 = AC4 * (unsigned long)(X3 + 32768) * (POW2_M15);
 	B7 = ((unsigned long)UP - B3) * (50000 >> oss);
 	if (B7 < 0x80000000)
 		Press = (B7 * 2) / B4;
 	else
 		Press = (B7 / B4) * 2;
-	X1 = (Press * (pow(2,-8))) * (Press * (pow(2,-8)));
-	X1 = (X1 * 3038) * (pow(2,-16));
-	X2 = (-7357 * Press) * (pow(2,-16));
-	Press = Press + (X1 + X2 + 3791) * (pow(2,-4));
+	X1 = (Press * (POW2_M8)) * (Press * (POW2_M8));
+	X1 = (X1 * 3038) * (POW2_M16);
+	X2 = (-7357 * Press) * (POW2_M16);
+	Press = Press + (X1 + X2 + 3791) * (POW2_M4);
 
 	return Press;
 }
